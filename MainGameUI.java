@@ -1,20 +1,29 @@
 
+import com.sun.javafx.fxml.expression.Expression;
 import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
+import java.util.concurrent.Callable;
+
+/**
+ * @author Hao Yu
+ *
+ */
 
 public class MainGameUI extends Application
 {
@@ -25,11 +34,14 @@ public class MainGameUI extends Application
     private Button disproveButton;
     private Button disproveButton2;
     private Button moveButton;
-    private Circle[] charTokens;
+    private static Circle[] charTokens;
     private Label characterLB;
     private Label idLB;
     private Scene scene1;
     private Scene scene2;
+    private Circle[] charTokens2;
+    private HashMap charToTokenMap;
+    private HashMap tokenToCoordinates;
 
     public static void main(String[] args)
     {
@@ -50,21 +62,36 @@ public class MainGameUI extends Application
         serverVB.getChildren().addAll(serverLB, serverTF);
 
         Button startButton = new Button("Start game");
-        startButton.setOnAction(event -> {window.setScene(scene2);});
+        startButton.setDisable(true);
+        startButton.setOnAction(event -> {
+            window.setScene(scene2);
+
+        });
 
         Button joinButton = new Button("Join game");
-        joinButton.setOnAction(event -> {window.setScene(scene2);});
+        joinButton.setOnAction(event -> {
+            //connect server
+            window.setScene(scene2);
+        });
 
         VBox box = new VBox();
         box.setPadding(new Insets(15));
         box.setAlignment(Pos.CENTER);
         box.setSpacing(20);
-        box.getChildren().addAll(serverVB, startButton, joinButton);
+        box.getChildren().addAll(serverVB, joinButton, startButton);
         scene1 = new Scene(box, 300, 200);
 
 
-
         //main game scene
+
+        setCharTokens();
+        setCharTokens2();
+        CharacterTokens map1 = new CharacterTokens();
+        charToTokenMap = map1.charToTokensMap();
+
+        TokenLocation map2 = new TokenLocation();
+        tokenToCoordinates = map2.gameBoardCoordinates();
+
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(10));
 
@@ -77,15 +104,14 @@ public class MainGameUI extends Application
 
         //Identity
         Label youAreLB = new Label("You are:");
-         characterLB = new Label();
+        characterLB = new Label();
         HBox charHB = new HBox();
 
         charHB.setSpacing(10);
         characterLB.setText("Miss Scarlet");   //set this label accordingly
         characterLB.setFont(Font.font("Verdana", 15));
-        Circle[] tokens = setCharTokens(1);
-        tokens[0].setFill(Color.RED);
-        charHB.getChildren().addAll(youAreLB, characterLB, tokens[0]);
+
+        charHB.getChildren().addAll(youAreLB, characterLB, charTokens2[0]);
         charHB.setAlignment(Pos.CENTER_LEFT);
         Label playerIDLB = new Label("Player ID:");
         idLB = new Label();
@@ -108,15 +134,17 @@ public class MainGameUI extends Application
         //Cards
         Label cardsLB = new Label("Your Cards");
         cardsLB.setFont(Font.font("Verdana", 15));
-        String[] cards = {"Mrs White", "Col Mustard", "Prof Plum", "Rope", "Revolver", "Kitchen" }; //input cards information here
+        String[] cards = {"Mrs White", "Col Mustard", "Prof Plum", "Rope", "Revolver", "Kitchen"}; //input cards information here
         VBox cardsRBVBox = setCardsRB(cards);
         Label turnStatus2LB = new Label("Your turn to disprove");
 
         disproveButton = new Button("Disprove");
-             disproveButton.setOnAction(event -> {});
+        disproveButton.setOnAction(event -> {
+        });
 
         disproveButton2 = new Button("Unable to disprove");
-             disproveButton2.setOnAction(event -> {});
+        disproveButton2.setOnAction(event -> {
+        });
 
         HBox disproveHB = new HBox();
         disproveHB.getChildren().addAll(turnStatus2LB, disproveButton, disproveButton2);
@@ -172,11 +200,13 @@ public class MainGameUI extends Application
 
         Button makeSuggButton = new Button("Make suggestion");
         makeSuggButton.setDisable(true);                          //set this property accordingly
-        makeSuggButton.setOnAction(event -> {});
+        makeSuggButton.setOnAction(event -> {
+        });
 
         Button makeAccuButton = new Button("Make accusation");
         makeAccuButton.setDisable(true);
-        makeAccuButton.setOnAction(event -> {});
+        makeAccuButton.setOnAction(event -> {
+        });
 
         HBox suggAccuButtonHB = new HBox();
         suggAccuButtonHB.getChildren().addAll(makeSuggButton, makeAccuButton);
@@ -202,22 +232,48 @@ public class MainGameUI extends Application
         Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
 
+        //create game board
         FlowPane middleStack = new FlowPane();
         middleStack.setVgap(15);
         middleStack.setOrientation(Orientation.VERTICAL);
         middleStack.setPrefWrapLength(700);
         VBox midUpper = new VBox();
         midUpper.setPadding(new Insets(10));
+        midUpper.setAlignment(Pos.CENTER);
+        midUpper.setSpacing(5);
+        Label gameBoardLB = new Label("Game Board");
+        gameBoardLB.setFont(Font.font("Verdana", 15));
+        Rectangle[] squares = createRooms();                                    //create rooms
+        Line[] hLines = createHorizontalLines();
+        Line[] vLines = createVerticalLines();
+        Group group = new Group();
+        for (Rectangle square : squares)
+            group.getChildren().add(square);
+        for (Line line : hLines)
+            group.getChildren().add(line);
+        for (Line line : vLines)
+            group.getChildren().add(line);
+        int[] charArray = {0, 1, 2, 3, 4, 5};
+        int[] locationArray = {10, 17, 14, 13, 18, 15};
+        placeTokens(charArray, locationArray);
+        for (int i = 0; i < 6; i++)
+            group.getChildren().add(charTokens[i]);
+        Text[] roomNames = new Text[9];
+        roomNames[0] = new Text(3, 12, "Study");
+        roomNames[1] = new Text(123, 12, "Hall");
+        roomNames[2] = new Text(243, 12, "Lounge");
+        roomNames[3] = new Text(3, 132, "Library");
+        roomNames[4] = new Text(123, 132, "Billiard");
+        roomNames[5] = new Text(243, 132, "Dining");
+        roomNames[6] = new Text(0, 252, "Conservatory");
+        roomNames[6].setFont(Font.font(10));
+        roomNames[7] = new Text(123, 252, "Ball");
+        roomNames[8] = new Text(243, 252, "Kitchen");
 
-        Label gameBoardLB = new Label("Game Board:");
-        Rectangle r = new Rectangle();
-        r.setFill(Color.WHITE);
-        r.setX(50);
-        r.setY(50);
-        r.setWidth(300);
-        r.setHeight(300);
+        for (Text room : roomNames)
+            group.getChildren().add(room);
 
-        midUpper.getChildren().addAll(gameBoardLB, r);
+        midUpper.getChildren().addAll(gameBoardLB, group);
 
         VBox midLower = new VBox();
         midLower.setPadding(new Insets(10));
@@ -235,7 +291,6 @@ public class MainGameUI extends Application
         middleStack.setPadding(new Insets(10));
 
         HBox middleSeg = new HBox();
-        middleSeg.setSpacing(10);
         middleSeg.getChildren().addAll(separator, middleStack, separator2);
         pane.setCenter(middleSeg);
 
@@ -328,8 +383,7 @@ public class MainGameUI extends Application
             cardsRBHBox.setSpacing(5);
             for (int i = 0; i < 4; i++)
                 cardsRBHBox.getChildren().add(cardsRB[i]);
-        }
-        else {
+        } else {
             cardsRBHBox.setAlignment(Pos.CENTER_LEFT);
             cardsRBHBox.setSpacing(8);
             for (int i = 0; i < numOfCards; i++)
@@ -338,16 +392,15 @@ public class MainGameUI extends Application
         HBox secondRowCardsRB = new HBox();
         secondRowCardsRB.setAlignment(Pos.CENTER_LEFT);
         secondRowCardsRB.setSpacing(8);
-        if(numOfCards>4) {
+        if (numOfCards > 4) {
             for (int i = 4; i < numOfCards; i++)
                 secondRowCardsRB.getChildren().add(cardsRB[i]);
-        }
-        else secondRowCardsRB = null;
+        } else secondRowCardsRB = null;
         VBox cardsRBVBox = new VBox();
         cardsRBVBox.setSpacing(8);
         cardsRBVBox.getChildren().addAll(cardsRBHBox, secondRowCardsRB);
         return cardsRBVBox;
-        }
+    }
 
     public VBox setPossibleMovesRB(String[] moves, boolean ableToMove)
     {
@@ -367,7 +420,8 @@ public class MainGameUI extends Application
             moveChoiceBox.getChildren().addAll(rb);
 
         moveButton = new Button("Make move");
-        moveButton.setOnAction(event -> {});   //user action
+        moveButton.setOnAction(event -> {
+        });   //user action
 
         HBox makeMoveHB = new HBox();
         makeMoveHB.getChildren().add(moveButton);
@@ -389,22 +443,125 @@ public class MainGameUI extends Application
 
     }
 
-    public Circle[] setCharTokens(int num)
+    public void setCharTokens()
     {
-        charTokens = new Circle[num];
-        for(int i=0; i<num; i++)
-        {
+        charTokens = new Circle[6];
+        for (int i = 0; i < 6; i++) {
             charTokens[i] = new Circle();
             charTokens[i].setRadius(5);
-
             charTokens[i].setStroke(Color.BLACK);
-            charTokens[i].setStrokeWidth(1);
+            charTokens[i].setStrokeWidth(0.6);
         }
+        charTokens[0].setFill(Color.RED);
+        charTokens[1].setFill(Color.YELLOW);
+        charTokens[2].setFill(Color.WHITE);
+        charTokens[3].setFill(Color.GREEN);
+        charTokens[4].setFill(Color.BLUE);
+        charTokens[5].setFill(Color.PURPLE);
+    }
+
+    public void setCharTokens2()
+    {
+        charTokens2 = new Circle[6];
+        for (int i = 0; i < 6; i++) {
+            charTokens2[i] = new Circle();
+            charTokens2[i].setRadius(5);
+            charTokens2[i].setStroke(Color.BLACK);
+            charTokens2[i].setStrokeWidth(0.8);
+        }
+        charTokens2[0].setFill(Color.RED);
+        charTokens2[1].setFill(Color.YELLOW);
+        charTokens2[2].setFill(Color.PURPLE);
+        charTokens2[3].setFill(Color.GREEN);
+        charTokens2[4].setFill(Color.WHITE);
+        charTokens2[5].setFill(Color.BLUE);
+    }
+
+    public static Circle[] getTokens()
+    {
         return charTokens;
     }
 
-    public HBox charNameToken(String name){
-        return null;
+    private Rectangle[] createRooms()
+    {
+        Rectangle[] squares = new Rectangle[9];
+        squares[0] = new Rectangle(0, 0, 60, 60);
+        squares[1] = new Rectangle(120, 0, 60, 60);
+        squares[2] = new Rectangle(240, 0, 60, 60);
+        squares[3] = new Rectangle(0, 120, 60, 60);
+        squares[4] = new Rectangle(120, 120, 60, 60);
+        squares[5] = new Rectangle(240, 120, 60, 60);
+        squares[6] = new Rectangle(0, 240, 60, 60);
+        squares[7] = new Rectangle(120, 240, 60, 60);
+        squares[8] = new Rectangle(240, 240, 60, 60);
+        for (int i = 0; i < 9; i++) {
+            squares[i].setStroke(Color.BLACK);
+            squares[i].setFill(null);
+            squares[i].setStrokeWidth(1);
+        }
+
+        return squares;
     }
 
+
+    private Line[] createHorizontalLines()
+    {
+        Line[] hLines = new Line[12];
+        hLines[0] = new Line(60, 20, 120, 20);
+        hLines[1] = new Line(60, 40, 120, 40);
+        hLines[2] = new Line(180, 20, 240, 20);
+        hLines[3] = new Line(180, 40, 240, 40);
+        hLines[4] = new Line(60, 140, 120, 140);
+        hLines[5] = new Line(60, 160, 120, 160);
+        hLines[6] = new Line(180, 140, 240, 140);
+        hLines[7] = new Line(180, 160, 240, 160);
+        hLines[8] = new Line(60, 260, 120, 260);
+        hLines[9] = new Line(60, 280, 120, 280);
+        hLines[10] = new Line(180, 260, 240, 260);
+        hLines[11] = new Line(180, 280, 240, 280);
+        for (int i = 0; i < 12; i++) {
+            hLines[i].setStroke(Color.BLACK);
+            hLines[i].setStrokeWidth(1);
+        }
+
+        return hLines;
+    }
+
+    private Line[] createVerticalLines()
+    {
+        Line[] vLines = new Line[12];
+        vLines[0] = new Line(20, 60, 20, 120);
+        vLines[1] = new Line(40, 60, 40, 120);
+        vLines[2] = new Line(140, 60, 140, 120);
+        vLines[3] = new Line(160, 60, 160, 120);
+        vLines[4] = new Line(260, 60, 260, 120);
+        vLines[5] = new Line(280, 60, 280, 120);
+        vLines[6] = new Line(20, 180, 20, 240);
+        vLines[7] = new Line(40, 180, 40, 240);
+        vLines[8] = new Line(140, 180, 140, 240);
+        vLines[9] = new Line(160, 180, 160, 240);
+        vLines[10] = new Line(260, 180, 260, 240);
+        vLines[11] = new Line(280, 180, 280, 240);
+        for (int i = 0; i < 12; i++) {
+            vLines[i].setStroke(Color.BLACK);
+            vLines[i].setStrokeWidth(1);
+        }
+
+        return vLines;
+    }
+
+    private void placeTokens(int[] characters, int[] locations)
+    {
+        int num = characters.length;
+        for (int i = 0; i < num; i++) {
+            Coordinates coordinates = (Coordinates) tokenToCoordinates.get(locations[i]);
+            charTokens[i] = (Circle) charToTokenMap.get(characters[i]);
+            int x = coordinates.getX();
+            int y = coordinates.getY();
+            System.out.println(x + " " + y);
+            charTokens[i].setCenterX(x);
+            charTokens[i].setCenterY(y);
+        }
+
+    }
 }
