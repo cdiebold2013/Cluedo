@@ -9,8 +9,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by Hao on 12/6/2016.
+ * Class ServerManager manages the server components of the clueless game
+ * socket code based upon code from
+ *      https://docs.oracle.com/javase/tutorial/networking/sockets/
+ *      http://www.dreamincode.net/forums/topic/259777-a-simple-chat-program-
+ *             with-clientserver-gui-optional/
+ * @author PD 
+ * @author Hao
+ * @version 1.3  
+ * 
  */
+
+
 public class ServerManager
 {
 
@@ -30,7 +40,7 @@ public class ServerManager
         game = new Game();
         uniqueId = 0;
 
-    } //end constructor with port
+    } //end constructor with port and ServerGUI parameters
 
 
     public void start()
@@ -75,7 +85,9 @@ public class ServerManager
     } //end method stop
 
     /**
-     * This method is mainly used for updating game history. It sends all clients their individual ClueLessMsg object with type GAMEHISTORY.
+     * This method is mainly used for updating game history. 
+     * It sends all clients their individual ClueLessMsg object 
+     * with type GAMEHISTORY.
      * @param players
      */
     private synchronized void broadcast(ClueLessMsg[] players)
@@ -88,22 +100,25 @@ public class ServerManager
         } //end for i
     } //end method broadcast
 
-    // for a client who logoff using the LOGOUT message
-   /* This part may not be necessary since we don't have the quite option in our game (a quite option will greatly complicate the game logic)
-   synchronized void remove(int id)
-    {
-        // scan the array list until we found the Id
-        for (int i = 0; i < clients.size(); ++i) {
-            Client ct = clients.get(i);
-            // found it
-            if (ct.id == id) {
-                clients.remove(i);
-                return;
-            } //end if
-        } //end for i
-    } //end method remove*/
+    
+//   //This is used for cleanup purposes on server. 
+//   synchronized void remove(int id)
+//    {
+//        // scan the array list until we found the Id
+//        for (int i = 0; i < clients.size(); ++i) {
+//            Client ct = clients.get(i);
+//            // found it
+//            if (ct.id == id) {
+//                clients.remove(i);
+//                return;
+//            } //end if
+//        } //end for i
+//    } //end method remove
 
-
+    /**
+     * Subclass client. Each connection from a client gets assigned to a thread
+     * 
+    */
     class Client extends Thread
     {
 
@@ -112,18 +127,19 @@ public class ServerManager
         ObjectOutputStream output;
         String username;
         ClueLessMsg cm;
-        int id;
+        int id; //auto assigned character 
+       
 
         Client(Socket socket)
         {
             this.socket = socket;
-            id = uniqueId++;
-            gui.writeLog("Socket " + socket.getLocalSocketAddress());
+            id = uniqueId++;  //assign in order based upon connection order
+           
             try {
                 output = new ObjectOutputStream(socket.getOutputStream());
                 input = new ObjectInputStream(socket.getInputStream());
                 username = (String) input.readObject();
-                gui.writeLog(username + " has connected");
+                gui.writeLog(username + " has connected as character " + id);
 
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -188,13 +204,7 @@ public class ServerManager
                     /*
                     Many more cases here
                      */
-
-
-                    //This case might not be necessary since the players have joined the game and been assigned characters and cards when they started the game
-                    //case ClueLessMsg.JOINGAME:
-                    //int requestedCharacter = Integer.parseInt(cm.getMessage());
-                        //see if it is available
-                       // break;
+                 
                 } //end switch
 
               /* Main processing for messages ends*/
@@ -238,6 +248,10 @@ public class ServerManager
 
         } //end method close
 
+        
+        public int getCharacter() {
+              return id;
+        } //end method getCharacter
     } //end class Client
 
-}
+} //end class servermanager
