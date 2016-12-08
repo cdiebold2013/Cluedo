@@ -1,9 +1,12 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Hao on 12/7/2016.
+ * @author PD 
+ * 8 Dec 2016 PD Serialized the class
  */
-public class Player
+public class Player implements Serializable
 {
     private int playerID;
     private int locationID;
