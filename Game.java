@@ -42,11 +42,11 @@ public class Game
         rooms = new ArrayList<>();
         for(int i=12; i<21; i++)
             rooms.add(i);
-        adjList = new ArrayList[32];
+        adjList = new ArrayList[33];
         for (int i = 0; i < 33; i++) {
             adjList[i] = new ArrayList<Node>();
         }
-        nodes = new Node[32];
+        nodes = new Node[33];
         for (int i = 0; i < 33; i++) {
             nodes[i] = new Node(i);
 
