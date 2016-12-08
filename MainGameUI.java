@@ -329,7 +329,7 @@ public class MainGameUI extends Application
             group.getChildren().add(line);
 
         int[] charArray = {0, 1, 2, 3, 4, 5};
-        int[] locationArray = {10, 17, 14, 13, 18, 15};
+        int[] locationArray = {22, 29, 26, 25, 30, 27};
 
         placeTokens(charArray, locationArray);
         for (int i = 0; i < 6; i++)
