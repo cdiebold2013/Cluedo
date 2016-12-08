@@ -1,4 +1,7 @@
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * @author PD, HY
@@ -10,7 +13,6 @@ public class Game
     //private int numOfPlayers;
     private ArrayList<Integer> rooms;
     private Node[] nodes;
-    private Player[] players;
 
     private class Node
     {
@@ -116,9 +118,26 @@ public class Game
 
     } //end constructor Game
 
-    public void startGame()
+    public void startGame(Player[] players)
     {
+        // choose n number of random starting locations
+        int[] locations = new Random().ints(0, 33).distinct().limit(players.length).toArray();
 
+        // assign cards and starting locations to each player
+        // update game history with players joining
+        int numberOfPlayers = players.length;
+        for (int i=0; i<numberOfPlayers; i++) {
+            Player player = players[i];
+
+            assignCards(player, numberOfPlayers);
+            player.setLocationID(locations[i]);
+            player.setGameHistoryUpdate(player.getUserName() + " joined the game and has cards assigned.");
+        }
+
+        // set turn to first player, and provide possible move options
+        Player player1 = players[0];
+        player1.setTurn(true);
+        player1.setMoveOptions(moveOptions(player1));
     } //end method StartGame
 
     public void endGame()
@@ -126,9 +145,11 @@ public class Game
 
     } //end method EndGame
 
-    public void assignCards()
+    public void assignCards(Player player, int numOfPlayers)
     {
-
+        // still needs to be written - only have code here to make 'startGame' work
+        ArrayList<Integer> cards = new ArrayList<Integer>();
+        player.setCards(cards);
     } //end method assignCards
 
     public ArrayList<Integer> moveOptions(Player player)
@@ -205,7 +226,7 @@ public class Game
         return null;
     }
 
-    public String gameHistoryUpdate(){
+    public String gameHistoryUpdate(String update){
         //generate game history update
         return null;
     }
