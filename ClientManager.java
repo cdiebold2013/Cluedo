@@ -43,6 +43,7 @@ public class ClientManager
         this.username = username;
         // save if we are in GUI mode or not
         this.gameUI = gameUI;
+	
     }
 
     public boolean start()
@@ -148,6 +149,7 @@ public class ClientManager
                         if(player.isJoin()){
                             String username = player.getJoinedPlayer();
                             gameUI.statusTA.appendText(username +" has joined the game.");
+			    player.setJoin(false);
                         }
 
                     }
