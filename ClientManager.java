@@ -144,7 +144,7 @@ public class ClientManager
                         //process the received player object here
 
                         /*
-                        if a player joined the game. Update the UI
+                        if some player joined the game. Update the UI
                          */
                         if(player.isJoin()){
                             String username = player.getJoinedPlayer();
