@@ -12,8 +12,8 @@ public class CaseFile {
         
        Random random = new Random();
        suspect = random.nextInt(6);      //random number from 0 to 5
-       weapon  = random.nextInt(6);      //random number from 0 to 5
-       room    = random.nextInt(9);     //random number from 0 to 8
+       weapon  = 6 + random.nextInt(6);      //random number from 6 to 11
+       room    = 12 + random.nextInt(9);     //random number from 12 to 20
     } //end constructor CaseFile
     
     //See if the accusation matches the casefile
