@@ -24,7 +24,21 @@ public class Player
     private boolean active;          //after a failed accusation, the player is inactive
     private int disprovedCard;
     private boolean disproved;
+    
 
+public Player(int playerID, String username){
+        this.playerID = playerID;
+        this.userName = username;
+       //all statuses are false by default
+        join = false;
+        isTurn = false;
+        isTurnToDisprove = false;
+        moved =false;
+        suggested = false;
+        accused = false;
+        active = false;
+        disproved = false;
+    }
 
 
     public String getJoinedPlayer()
