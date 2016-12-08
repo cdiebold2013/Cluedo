@@ -4,12 +4,14 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by Hao on 12/6/2016.
+ * @author PD
+ * @author Hao
+ * @version 1.4
+ * 
  */
 public class ServerManager
 {
@@ -78,15 +80,25 @@ public class ServerManager
      * This method is mainly used for updating game history. It sends all clients their individual ClueLessMsg object with type GAMEHISTORY.
      * @param players
      */
-    private synchronized void broadcast(Player[] players)
+    private synchronized void broadcast()
     {
-
         for (int i = clients.size(); i >= 0; i--) {
             Client ct = clients.get(i);
-            // try to write to the Client if it fails remove it from the list
-            ct.sendPlayerObj(players[i]);
+            ct.sendPlayerObj();
         } //end for i
     } //end method broadcast
+    
+    
+     private synchronized void broadcastJoinedPlayer(String joinedPlayer)
+    {
+        for (int i = clients.size(); i >= 0; i--) {
+            Client ct = clients.get(i);
+            ct.player.setJoinedPlayer(joinedPlayer);
+            ct.sendPlayerObj();
+        } //end for i
+    } //end method broadcast
+    
+    
 
     private void notifyPlayer(Player player){
 
@@ -94,7 +106,7 @@ public class ServerManager
             if(i== player.getPlayerID())
             {
                 Client ct = clients.get(i);
-                ct.sendPlayerObj(player);
+                ct.sendPlayerObj();
             }
         }
     }
@@ -106,32 +118,47 @@ public class ServerManager
         ObjectInputStream input;
         ObjectOutputStream output;
         String username;
-        Player player;
-        int id;
+        Player player; 
+        Player inPlayer; //incoming player from client
+        int id;  //auto assigned character
 
         Client(Socket socket)
         {
+           
             this.socket = socket;
-            id = uniqueId++;
+            id = uniqueId++; //assign in order based upon connection order
             gui.writeLog("Socket " + socket.getLocalSocketAddress());
             try {
                 output = new ObjectOutputStream(socket.getOutputStream());
                 input = new ObjectInputStream(socket.getInputStream());
                 username = (String) input.readObject();
-                gui.writeLog(username + " has connected");
+                gui.writeLog(username + " has connected as character " + id);
 
             } catch (IOException | ClassNotFoundException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             } //end try catch
+            
+             this.player = new Player(id, username);
+            
         } //end client constructor socket argument
 
         @Override
         public void run()
         {
             boolean runFlag = true;
+            
+            //Send the first player object after a connection
+            player.setJoin(true);  //Confirm this needs to be done
+            sendPlayerObj(); 
+            
+            /*Do this after the first player as joined */
+            if (id > 0) {
+               broadcastJoinedPlayer(player.getUserName() + "," + player.getPlayerID()); 
+            } //end if id > 0 
+            
             while (runFlag) {
                 try {
-                    player = (Player) input.readObject();
+                    inPlayer = (Player) input.readObject();
                 } catch (IOException | ClassNotFoundException ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     break;
@@ -151,7 +178,7 @@ public class ServerManager
             }
         } // end run method
 
-        private boolean sendPlayerObj(Player player)
+        private boolean sendPlayerObj()
         {
             if (!socket.isConnected()) {
                 try {
