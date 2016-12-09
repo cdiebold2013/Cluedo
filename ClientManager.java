@@ -3,6 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import javafx.application.Platform;
 
 /**
  * Created by Hao on 12/6/2016.
@@ -136,8 +137,9 @@ public class ClientManager
         {
             while (true) {
                 try {
-
+                    
                     player = (Player) sInput.readObject();
+                  //  System.out.println("Client has received player object from server");
                     if (player == null) {
                         System.out.print("> ");
                     } else {
@@ -148,8 +150,13 @@ public class ClientManager
                          */
                         if(player.isJoin()){
                             String username = player.getJoinedPlayer();
-                            gameUI.statusTA.appendText(username +" has joined the game.");
-			    player.setJoin(false);
+                               
+                        Platform.runLater(new Runnable() {
+                             @Override public void run() {
+                             gameUI.statusTA.appendText(username +" has joined the game.\n");
+                        }});
+                            
+			   // player.setJoin(false);
                         }
 
                     }
