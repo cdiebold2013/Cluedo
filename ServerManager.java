@@ -23,6 +23,7 @@ public class ServerManager
     private ArrayList<Client> clients;
     private static int uniqueId;
     private Game game;
+    private Player player;
 
     public ServerManager(Integer port, ServerGUI gui)
     {
@@ -63,7 +64,7 @@ public class ServerManager
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
+          //  Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
         } //end try catch
 
     } //end method start
@@ -91,10 +92,22 @@ public class ServerManager
     
      private synchronized void broadcastJoinedPlayer(String joinedPlayer)
     {
-        for (int i = clients.size(); i >= 0; i--) {
+       
+        for (int i = 0; i < clients.size(); i++) {
+           
             Client ct = clients.get(i);
+            
             ct.player.setJoinedPlayer(joinedPlayer);
+            ct.player.setJoin(true);
+            
+            gui.writeLog("Broadcast Method: Notifying " + ct.getPlayerObj().getUserName() + " that player " + ct.getPlayerObj().getJoinedPlayer() + " joined game");
+            
+            
             ct.sendPlayerObj();
+            
+            ct.player.setJoinedPlayer(null);
+            ct.player.setJoin(false);
+            
         } //end for i
     } //end method broadcast
     
@@ -147,20 +160,18 @@ public class ServerManager
         {
             boolean runFlag = true;
             
-            //Send the first player object after a connection
-            player.setJoin(true);  //Confirm this needs to be done
-            sendPlayerObj(); 
             
-            /*Do this after the first player as joined */
-            if (id > 0) {
-               broadcastJoinedPlayer(player.getUserName() + "," + player.getPlayerID()); 
-            } //end if id > 0 
+            //notify everyone that another player joined
+            broadcastJoinedPlayer(player.getUserName() + "," + player.getPlayerID()); 
+           
+            
+           
             
             while (runFlag) {
                 try {
                     inPlayer = (Player) input.readObject();
                 } catch (IOException | ClassNotFoundException ex) {
-                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                 //   Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     break;
                 } //end try catch
 
@@ -173,7 +184,7 @@ public class ServerManager
                 try {
                     close();
                 } catch (IOException ex) {
-                    Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
+                  // Logger.getLogger(ServerManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         } // end run method
@@ -189,6 +200,9 @@ public class ServerManager
                 return false;
             }
             try {
+                gui.writeLog("sendPlayerObj Method: Notifying " + player.getUserName() + " that player " + player.getJoinedPlayer() + " joined game");
+            
+               
                 output.writeObject(player);
             } catch (IOException e) {
                 gui.writeLog("Exception writing to client: " + e);
@@ -196,6 +210,10 @@ public class ServerManager
             } //end try catch
             return true;
         } //end method sendMessage
+        
+        private Player getPlayerObj() {
+            return player;
+        }
 
 
         private void close() throws IOException
