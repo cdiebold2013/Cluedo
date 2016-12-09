@@ -97,10 +97,14 @@ public class ServerManager
            
             Client ct = clients.get(i);
             
+         //   gui.writeLog("UserName: " + ct.player.getUserName() + " JoinedPlayer: " + ct.player.getJoinedPlayer() );
+            
+            
+           
             ct.player.setJoinedPlayer(joinedPlayer);
             ct.player.setJoin(true);
             
-            gui.writeLog("Broadcast Method: Notifying " + ct.getPlayerObj().getUserName() + " that player " + ct.getPlayerObj().getJoinedPlayer() + " joined game");
+            gui.writeLog("Broadcast Method: Notifying " + ct.player.getUserName() + " that player " + ct.player.getJoinedPlayer() + " joined game");
             
             
             ct.sendPlayerObj();
@@ -225,10 +229,11 @@ public class ServerManager
                 return false;
             }
             try {
-                gui.writeLog("sendPlayerObj Method: Notifying " + player.getUserName() + " that player " + player.getJoinedPlayer() + " joined game");
+             //   gui.writeLog("sendPlayerObj Method: Notifying " + player.getUserName() + " that player " + player.getJoinedPlayer() + " joined game");
             
                
                 output.writeObject(player);
+                output.reset(); //Must have this or same msg is sent each time
             } catch (IOException e) {
                 gui.writeLog("Exception writing to client: " + e);
 
