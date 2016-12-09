@@ -23,7 +23,7 @@ public class ServerManager
     private ArrayList<Client> clients;
     private static int uniqueId;
     private Game game;
-    private Player player;
+  //  private Player player;
 
     public ServerManager(Integer port, ServerGUI gui)
     {
@@ -112,6 +112,27 @@ public class ServerManager
     } //end method broadcast
     
     
+    private synchronized void sendCurrentPlayers (Client id){
+        Client myCT = id;
+        
+        for(int i= 0; i<clients.size(); i++){
+               if (myCT.id!=i) {
+               
+               Client ct = clients.get(i); 
+               String joinedPlayer = ct.player.getUserName() + "," + ct.player.getPlayerID();
+               
+               myCT.player.setJoinedPlayer(joinedPlayer);
+               myCT.player.setJoin(true); 
+               myCT.sendPlayerObj();
+               myCT.player.setJoinedPlayer(null);
+               myCT.player.setJoin(false); 
+               } //end if 
+                
+        } //end for loop
+        
+    } //end method sendCurrentPlayers
+     
+     
 
     private void notifyPlayer(Player player){
 
@@ -151,7 +172,7 @@ public class ServerManager
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             } //end try catch
             
-             this.player = new Player(id, username);
+             player = new Player(id, username);
             
         } //end client constructor socket argument
 
@@ -161,9 +182,13 @@ public class ServerManager
             boolean runFlag = true;
             
             
-            //notify everyone that another player joined
+            //notify all clients that I joined the game
             broadcastJoinedPlayer(player.getUserName() + "," + player.getPlayerID()); 
            
+            //notify me of all clients current joined to game
+            sendCurrentPlayers(this);
+            
+            
             
            
             
