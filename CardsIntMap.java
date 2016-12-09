@@ -11,6 +11,7 @@ public class CardsIntMap
 
     public CardsIntMap()
     {
+        cardToIntMap = HashBiMap.create();
         //characters 0-5
         cardToIntMap.put("Miss Scarlet", 0);
         cardToIntMap.put("Col Mustard", 1);
