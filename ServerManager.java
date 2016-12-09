@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 /**
  * @author PD
  * @author Hao
- * @version 1.4
+ * @version 1.5
  * 
  */
 public class ServerManager
@@ -116,6 +116,54 @@ public class ServerManager
     } //end method broadcast
     
     
+    private synchronized void broadcastGameHistory(String GameHistoryUpdate)
+    {
+       
+        for (int i = 0; i < clients.size(); i++) {
+           
+            Client ct = clients.get(i);
+            
+                  
+           
+            ct.player.setGameHistoryUpdate(GameHistoryUpdate);
+           
+            
+            gui.writeLog("Broadcast Method: Game History " + ct.player.getGameHistoryUpdate());
+            
+            
+            ct.sendPlayerObj();
+            
+            ct.player.setGameHistoryUpdate(null);
+            
+            
+        } //end for i
+    } //end method broadcastgameHistory
+    
+    private synchronized void broadcastInitialSetup ()
+    {
+       
+        for (int i = 0; i < clients.size(); i++) {
+           
+            Client ct = clients.get(i);
+           
+                   
+            ct.player.setInitialSetup(true);
+            ct.player.setGamePieceLocations(game.gamePieceLocations());
+            ct.player.setGameHistoryUpdate("Game Started");   
+         //    ct.player.setCards(game.assignCards(ct.player.getPlayerID()));
+            gui.writeLog("Broadcast Method: Initial Setup" + ct.player.getGameHistoryUpdate());
+            
+            
+            ct.sendPlayerObj();
+            
+            ct.player.setGameHistoryUpdate(null);
+            ct.player.setInitialSetup(false);
+            ct.player.setStarted(false);
+            
+        } //end for i
+    } //end method broadcastgameHistory
+    
+     
     private synchronized void sendCurrentPlayers (Client id){
         Client myCT = id;
         
@@ -204,10 +252,64 @@ public class ServerManager
                     break;
                 } //end try catch
 
-
-                /*
-                processing the received player object here
-                 */
+                /* Process initial start of game */ 
+                if(inPlayer.isStarted()) {broadcastInitialSetup();} 
+               
+               
+                
+                
+                //Process an accusation 
+                if (inPlayer.isAccused()) {
+                  
+                   ArrayList<Integer> accusation = inPlayer.getAccusation();                  
+                   if (game.processAccusation(accusation.get(0), accusation.get(1), accusation.get(2))) {
+                       //declare winner game is over
+                       broadcastGameHistory("WINNER," + player.getPlayerID());
+                   } else  {
+                       //accused failed and set active flag for this player 
+                       player.setActive(false);
+                       broadcastGameHistory("ACCUSEFAILED," + player.getPlayerID());
+                       
+                       //set the turn for the nextplayer
+                       int nextTurn;
+                       if (id==clients.size()) {
+                           nextTurn = 0;
+                        
+                       } else {
+                           nextTurn =id + 1;
+                       }
+                       
+                       //set isTurn on each player object
+                       
+                       
+                   } //end if else
+                   
+                } //end if isAccused
+                
+                
+                if(inPlayer.isMoved()) {
+                    
+                    
+                    
+                } //end if isMoved
+                
+                
+                
+                if(inPlayer.isSuggested()) {
+                    
+                    
+                    
+                } //end if isSuggested
+                
+                
+                if(inPlayer.isDisproved()) {
+                    
+                    
+                    
+                } //end if isDisproved
+                
+                
+                
 
 
                 try {
@@ -248,7 +350,7 @@ public class ServerManager
 
         private void close() throws IOException
         {
-
+            System.out.println("Closing connection " + player.getUserName());
             if (output != null) output.close();
             if (input != null) input.close();
             if (socket != null) socket.close();
