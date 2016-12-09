@@ -33,8 +33,8 @@ public class CardsIntMap
         cardToIntMap.put("Hall", 13);
         cardToIntMap.put("Lounge", 14);
         cardToIntMap.put("Library", 15);
-        cardToIntMap.put("Billiard Room", 16);
-        cardToIntMap.put("Dining Room", 17);
+        cardToIntMap.put("Billiard room", 16);
+        cardToIntMap.put("Dining room", 17);
         cardToIntMap.put("Conservatory", 18);
         cardToIntMap.put("Ballroom", 19);
         cardToIntMap.put("Kitchen", 20);
