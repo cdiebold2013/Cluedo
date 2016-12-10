@@ -189,9 +189,9 @@ public class ClientManager
                                     {
                                         gameUI.characterLB.setText((String) gameUI.intCardMap.get(id));
                                         gameUI.idLB.setText(Integer.toString(id));
-                                     //   gameUI.setCardsRB(list);
-                                     //   cardsRBVBox = gameUI.getCardsRBVBox();
-                                     //   cardsRBVBox.setVisible(true);
+                                        gameUI.setCardsRB(list);
+                                        cardsRBVBox = gameUI.getCardsRBVBox();
+                                        cardsRBVBox.setVisible(true);
                                         gameUI.window.setScene(gameUI.scene2);
                                     }
                                 });
@@ -199,6 +199,48 @@ public class ClientManager
                             }
 
                             if (player.isTurn()) {
+				     ArrayList<Integer> list = player.getAllowedActions();
+                               // System.out.println(list.toString());
+                                if (list.get(list.size()-1) == 1) {
+
+                                    Platform.runLater(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            if (list.size() > 1) {
+                                                ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size()-1));
+                                                gameUI.setPossibleMovesRB(sublist);
+                                                moveSections = gameUI.getMovesSection();
+                                                moveSections.setVisible(true);
+
+                                            }
+                                            else gameUI.notAbleToMove.setVisible(true);
+                                        }
+
+
+                                    });
+                                    player.setTurn(false);
+                                }
+                                if (list.get(list.size()-1) == 0) {
+                                    Platform.runLater(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            if (list.size() > 1) {
+                                                ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size()-1));
+                                                gameUI.setPossibleMovesRB(sublist);
+                                                moveSections = gameUI.getMovesSection();
+                                                moveSections.setVisible(true);
+                                            }
+                                            else gameUI.notAbleToMove.setVisible(true);
+                                            gameUI.makeSuggButton.setDisable(false);
+                                        }
+
+                                    });
+                                    player.setTurn(false);
+                                }
 
                             }
 
@@ -223,7 +265,7 @@ public class ClientManager
                                 @Override
                                 public void run()
                                 {
-                                  //  gameUI.placeTokens(gamePieceLoc);
+                                    gameUI.placeTokens(gamePieceLoc);
                                     gameUI.gameHistoryTA.appendText(gameUpdate+ "\n");
                                 }
                             });
