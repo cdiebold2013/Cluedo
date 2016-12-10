@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
+import java.util.Collections;
+
 
 /**
  * @author PD, HY
@@ -13,6 +15,11 @@ public class Game
     //private int numOfPlayers;
     private ArrayList<Integer> rooms;
     private Node[] nodes;
+    //separate arraylists for assigning cards
+    private ArrayList<Integer> locations;
+    private ArrayList<Integer> characters;
+    private ArrayList<Integer> weapons;
+    private ArrayList<Integer> caseFile2; // written with the assigning of the cards
 
     private class Node
     {
@@ -53,6 +60,7 @@ public class Game
             nodes[i] = new Node(i);
 
         }
+
         //construct the adjacency list. Note that the indices of the linked list in the linkedlist array correspond to the location IDs of the rooms and hallways
         adjList[12].add(nodes[21]);
         adjList[12].add(nodes[20]);
@@ -116,6 +124,7 @@ public class Game
         adjList[32].add(nodes[17]);
         adjList[32].add(nodes[20]);
 
+
     } //end constructor Game
 
     public void startGame(Player[] players)
@@ -146,9 +155,9 @@ public class Game
 
     public void assignCards(Player player, int numOfPlayers)
     {
-        // still needs to be written - only have code here to make 'startGame' work
         ArrayList<Integer> cards = new ArrayList<Integer>();
-        player.setCards(cards);
+        player.setCards(cards, numOfPlayers);
+
     } //end method assignCards
 
     public ArrayList<Integer> moveOptions(Player player)
@@ -180,7 +189,7 @@ public class Game
     public void processSuggestion()
     {
 
-    } //end method processSuggestion 
+    } //end method processSuggestion
 
     public boolean processAccusation(int suspect, int weapon, int room)
     {
@@ -192,7 +201,7 @@ public class Game
         } else { //did not match
             return false;
         } //end if else match
-    } //end method processAccusation 
+    } //end method processAccusation
 
     public void setPlayerTurn()
     {
