@@ -137,7 +137,6 @@ public class Game
         // set turn to first player, and provide possible move options
         Player player1 = players[0];
         player1.setTurn(true);
-        player1.setMoveOptions(moveOptions(player1));
     } //end method StartGame
 
     public void endGame()
