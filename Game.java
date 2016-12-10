@@ -203,12 +203,11 @@ public class Game
 
     public ArrayList<Integer> allowedActions(Player player){
         int locationID = player.getLocationID();
-        ArrayList<Integer> moves = new ArrayList<>();
+        ArrayList<Integer> moves = moveOptions(player);
         //the first element of moves is to signal what type of actions are allowed for this player
         if(rooms.contains(locationID)) moves.add(0); //if the player is in a room, 0 indicates he can move or suggest
         else moves.add(1);  //if the player is in the hallway, 1 indicates he can only move
         //either 0 or 1 implies the player can accuse
-        moves.addAll(moveOptions(player));
         return moves;
     }
 
