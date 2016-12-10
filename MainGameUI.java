@@ -148,8 +148,7 @@ public class MainGameUI extends Application
             player.setStarted(true);
             client.sendMessage(player);
            startButton.setDisable(true);
-            window.setScene(scene2);
-
+            
         });
 
         Label statusLB = new Label("Connection status:");
