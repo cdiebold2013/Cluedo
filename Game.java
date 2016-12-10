@@ -185,7 +185,7 @@ public class Game
     public boolean processAccusation(int suspect, int weapon, int room)
     {
         System.out.println("Game:" + suspect + " " + weapon + " " + room);
-
+        casefile.getCaseFile();
         Boolean match = casefile.matchCaseFile(suspect, weapon, room);
         if (match) {   //we have a winner
             return true;
