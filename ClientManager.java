@@ -192,7 +192,7 @@ public class ClientManager
                                      //   gameUI.setCardsRB(list);
                                      //   cardsRBVBox = gameUI.getCardsRBVBox();
                                      //   cardsRBVBox.setVisible(true);
-
+                                        gameUI.window.setScene(gameUI.scene2);
                                     }
                                 });
                                 player.setInitialSetup(false);
