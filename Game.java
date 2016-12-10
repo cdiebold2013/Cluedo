@@ -118,16 +118,16 @@ public class Game
 
     } //end constructor Game
 
-    public void startGame(Player[] players)
+    public void startGame(ArrayList<Player> players)
     {
         // choose n number of random starting locations
-        int[] locations = new Random().ints(0, 33).distinct().limit(players.length).toArray();
+        int[] locations = new Random().ints(0, 33).distinct().limit(players.size()).toArray();
 
         // assign cards and starting locations to each player
         // update game history with players joining
-        int numberOfPlayers = players.length;
+        int numberOfPlayers = players.size();
         for (int i=0; i<numberOfPlayers; i++) {
-            Player player = players[i];
+            Player player = players.get(i);
 
             assignCards(player, numberOfPlayers);
             player.setLocationID(locations[i]);
@@ -135,7 +135,7 @@ public class Game
         }
 
         // set turn to first player, and provide possible move options
-        Player player1 = players[0];
+        Player player1 = players.get(0);
         player1.setTurn(true);
     } //end method StartGame
 
