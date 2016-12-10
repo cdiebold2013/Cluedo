@@ -21,6 +21,7 @@ public class ServerManager
     private boolean runFlag;
     private ServerSocket serverSocket;
     private ArrayList<Client> clients;
+    private ArrayList<Player> players;
     private static int uniqueId;
     private Game game;
   //  private Player player;
@@ -29,7 +30,8 @@ public class ServerManager
     {
         this.port = port;
         this.gui = gui;
-        clients = new ArrayList<Client>();
+        clients = new ArrayList<>();
+        players = new ArrayList<>();
         game = new Game();
         uniqueId = 0;
 
@@ -196,6 +198,11 @@ public class ServerManager
             }
         }
     }
+    
+    private synchronized void addPlayer(Player player) {
+        players.add(player);
+    } //end method addPlayer
+    
 
     class Client extends Thread
     {
@@ -225,6 +232,7 @@ public class ServerManager
             } //end try catch
             
              player = new Player(id, username);
+             addPlayer(player); //add to servermanagers players arraylist
             
         } //end client constructor socket argument
 
@@ -257,6 +265,7 @@ public class ServerManager
                 /* Process initial start of game */ 
                 if(inPlayer.isStarted()) {
                     gui.writeLog("received isStarted from " + inPlayer.getUserName());
+                    game.startGame(players);
                     broadcastInitialSetup();   
                 } //isStarted
               
@@ -276,14 +285,6 @@ public class ServerManager
                        player.setActive(false);
                        broadcastGameHistory("ACCUSEFAILED," + player.getPlayerID());
                        
-                       //set the turn for the nextplayer
-                       int nextTurn;
-                       if (id==clients.size()) {
-                           nextTurn = 0;
-                        
-                       } else {
-                           nextTurn =id + 1;
-                       }
                        
                        //set isTurn on each player object
                        
@@ -294,7 +295,7 @@ public class ServerManager
                 
                 
                 if(inPlayer.isMoved()) {
-                    
+                   
                     
                     
                 } //end if isMoved
