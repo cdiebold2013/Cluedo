@@ -85,7 +85,7 @@ public class ServerManager
      */
     private synchronized void broadcast()
     {
-        for (int i = clients.size(); i >= 0; i--) {
+        for (int i = 0; i < clients.size(); i++) {
             Client ct = clients.get(i);
             ct.sendPlayerObj();
         } //end for i
@@ -266,7 +266,10 @@ public class ServerManager
                 if(inPlayer.isStarted()) {
                     gui.writeLog("received isStarted from " + inPlayer.getUserName());
                     game.startGame(players);
-                    broadcastInitialSetup();   
+                    broadcast();
+                    player.setInitialSetup(false);
+                    player.setStarted(false);
+                   // broadcastInitialSetup();   
                 } //isStarted
               
                 
