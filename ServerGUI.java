@@ -21,7 +21,7 @@ public class ServerGUI extends JFrame  {
     ServerGUI() {
         super("ClueLess Server");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1024, 768);
+        setSize(800, 600);
         JScrollPane serverLog = new JScrollPane(jtaServerLog);
 
         JSplitPane splitMessages = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -85,6 +85,9 @@ public class ServerGUI extends JFrame  {
 
     } //end method writeLog
 
+    public void resetLog() {
+        jtaServerLog.setText("");
+    }  //end method resetLog
 
     /**
      * Run SvrMgr on a separate thread
