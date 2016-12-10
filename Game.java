@@ -132,6 +132,7 @@ public class Game
             assignCards(player, numberOfPlayers);
             player.setLocationID(locations[i]);
             player.setGameHistoryUpdate(player.getUserName() + " joined the game and has cards assigned.");
+            player.setInitialSetup(true);
         }
 
         // set turn to first player, and provide possible move options
