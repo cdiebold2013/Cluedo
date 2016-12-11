@@ -255,7 +255,7 @@ public class Player implements Serializable
         suggested = false;
 
         accused = false;
-        active = false;
+        active = true;
         disproved = false;
     }
 
