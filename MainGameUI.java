@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
@@ -31,22 +32,28 @@ import com.google.common.collect.HashBiMap;
 public class MainGameUI extends Application
 {
 
-    private static Circle[] charTokens;
+    protected static Circle[] charTokens;
     protected TextArea statusTA;
     protected BiMap cardIntMap;
     protected BiMap intCardMap;
     protected Label idLB;
-    private Stage window;
-    private ToggleGroup group1;
-    private ToggleGroup group2;
-    private Button disproveButton;
-    private Button disproveButton2;
-    private Button moveButton;
-    private Scene scene1;
-    private Scene scene2;
-    private Circle[] charTokens2;
+    protected Stage window;
+    protected ToggleGroup group1;
+    protected ToggleGroup group2;
+    protected Button disproveButton;
+    protected Button disproveButton2;
+    //private Button moveButton;
+    protected Scene scene1;
+    protected Scene scene2;
     protected HashMap charToTokenMap;
     protected HashMap tokenToCoordinates;
+    //private HBox moveButtonHBox;
+    protected Label characterLB;
+    protected Group group;
+    protected TextArea gameHistoryTA;
+    protected Label notAbleToMove;
+    protected Button makeSuggButton;
+    private Circle[] charTokens2;
     private boolean connected;
     private Button joinButton;
     private TextField portTF;
@@ -58,19 +65,11 @@ public class MainGameUI extends Application
     private int currLocation;
     private ClientManager client;
     private Player player;
-    private HBox moveButtonHBox;
-    protected Label characterLB;
-    protected Group group;
-    protected TextArea gameHistoryTA;
+    private VBox movesSection;
 
     public static void main(String[] args)
     {
         launch(args);
-    }
-
-    public static Circle[] getTokens()
-    {
-        return charTokens;
     }
 
     public void start(Stage primaryStage)
@@ -145,10 +144,12 @@ public class MainGameUI extends Application
         startButton.setOnAction(event -> {
 
             player = client.getPlayer();
+
             player.setStarted(true);
+            System.out.println("Status of isStarted: " + player.isStarted());
             client.sendMessage(player);
-           startButton.setDisable(true);
-            window.setScene(scene2);
+            startButton.setDisable(true);
+            //window.setScene(scene2);
 
         });
 
@@ -226,38 +227,34 @@ public class MainGameUI extends Application
         cardsRBVBox.setSpacing(8);
         cardsRBVBox.setVisible(false);
 
-        /*ArrayList<Integer> cards = new ArrayList<>();
-        cards.add(4);
-        cards.add(8);
-        cards.add(15);                                                          //display cards
-
-        cardsRBVBox = setCardsRB(cards);*/
-
-
 
         Label turnStatus2LB = new Label("Your turn to disprove");
         disproveButton = new Button("Disprove");
+        disproveButton.setDisable(true);
         disproveButton.setOnAction(event ->                                     //disprove buttons
         {
-                if (group1.getSelectedToggle() == null)
-                    player.setDisprovedCard(-1);
-                else {
-                    int m = (Integer) group1.getSelectedToggle().getUserData();
-                    System.out.println(m);
-                }
+            player = client.getPlayer();
+            if (group1.getSelectedToggle() == null)
+                player.setDisprovedCard(-1);
+            else {
+                int m = (Integer) group1.getSelectedToggle().getUserData();              //extract disproved card
+                System.out.println(m);
+            }
             player.setDisproved(true);
             client.sendMessage(player);
-            disproveButton.setDisable(true);
+
 
         });
 
         disproveButton2 = new Button("Unable to disprove");
+        disproveButton2.setDisable(true);
         disproveButton2.setOnAction(event ->
         {
+            player = client.getPlayer();
             player.setDisproved(true);
             player.setDisprovedCard(-1);
             client.sendMessage(player);
-            disproveButton2.setDisable(true);
+
         });
 
         HBox disproveHB = new HBox();
@@ -313,25 +310,24 @@ public class MainGameUI extends Application
         suggAccuHB.getChildren().addAll(charVB2, weaponVB2, roomVB2);
         suggAccuHB.setSpacing(20);
 
-        Button makeSuggButton = new Button("Make suggestion");
-        makeSuggButton.setDisable(false);                               //set this property accordingly
+        makeSuggButton = new Button("Make suggestion");
+        makeSuggButton.setDisable(true);                               //set this property accordingly
 
         makeSuggButton.setOnAction(event ->                           //button for making suggestion
         {
-           if(verifyComboBoxInput(characterCB, weaponCB, roomCB)) {
-               ArrayList<Integer> values = getSuggAccuValues(characterCB, weaponCB, roomCB);
-               //validate room
-               int currLocation = player.getLocationID();
-               if (currLocation == values.get(2))
-                   AlertBox.display("The suggested room has to be the room you are in.");
-               else {
-                   player.setSuggested(true);
-                   player.setSuggestoin(values);
-                   client.sendMessage(player);
-                   makeSuggButton.setDisable(true);
+            if (verifyComboBoxInput(characterCB, weaponCB, roomCB)) {
+                ArrayList<Integer> values = getSuggAccuValues(characterCB, weaponCB, roomCB);
+                //validate room
+                int currLocation = player.getLocationID();
+                if (currLocation == values.get(2))
+                    AlertBox.display("The suggested room has to be the room you are in.");
+                else {
+                    player.setSuggested(true);
+                    player.setSuggestoin(values);
+                    client.sendMessage(player);
 
-               }
-           }  //send player object
+                }
+            }  //send player object
 
             else
                 AlertBox.display("Please select a value to suggest.");
@@ -342,16 +338,17 @@ public class MainGameUI extends Application
         makeAccuButton.setDisable(false);
         makeAccuButton.setOnAction(event ->
         {
-            if(verifyComboBoxInput(characterCB, weaponCB, roomCB)) {
+            if (verifyComboBoxInput(characterCB, weaponCB, roomCB)) {
                 ArrayList<Integer> values = getSuggAccuValues(characterCB, weaponCB, roomCB);
                 player = client.getPlayer();
-                    player.setAccused(true);
-                    player.setAccusation(values);
+                System.out.println("Has the player started? " + player.isStarted());
+                player.setAccused(true);
+                System.out.println("Has the player accused? " + player.isAccused());
+                player.setAccusation(values);
                 client.sendMessage(player);
-                makeAccuButton.setDisable(true);  //making accusation
+                makeAccuButton.setDisable(true);                                    //making accusation
 
-            }
-            else
+            } else
                 AlertBox.display("Please select a value to accuse.");
         });
 
@@ -367,20 +364,17 @@ public class MainGameUI extends Application
         leftStack.getChildren().add(suggAccuVB);
 
         //Possible moves
-        moveButton = new Button("Make move");
-        moveButtonHBox = new HBox();
-        moveButtonHBox.setAlignment(Pos.CENTER);
-        moveButton.setOnAction(e ->{
-            //send player object
-        });
-        ArrayList<Integer> moves = new ArrayList<>();                            //extract moves from player object
-        moves.add(14);
-        moves.add(20);
-        moves.add(32);
-        VBox movesSection = setPossibleMovesRB(moves, true);
+
+
+        movesSection = new VBox();
+        movesSection.setSpacing(30);
+        group2 = new ToggleGroup();
+        movesSection.setVisible(false);
+        notAbleToMove = new Label("No valid moves.");
+        notAbleToMove.setVisible(false);
+
         leftStack.getChildren().add(movesSection);
         pane.setLeft(leftStack);
-
 
 
         //middle section of the screen
@@ -425,13 +419,14 @@ public class MainGameUI extends Application
         for (Text room : roomNames)
             group.getChildren().add(room);
 
+
         midUpper.getChildren().addAll(gameBoardLB, group);
 
         VBox midLower = new VBox();
         midLower.setPadding(new Insets(10));
         Label gameHistoryLB = new Label("Game History");
         gameHistoryLB.setFont(Font.font("Verdana", 15));
-       gameHistoryTA = new TextArea();                                               //Game history text area
+        gameHistoryTA = new TextArea();                                               //Game history text area
         gameHistoryTA.setPrefSize(350, 250);
         gameHistoryTA.setEditable(false);
         midLower.getChildren().addAll(gameHistoryLB, gameHistoryTA);
@@ -572,15 +567,14 @@ public class MainGameUI extends Application
 
     }*/
 
-    public VBox setPossibleMovesRB(ArrayList<Integer> moves, boolean ableToMove)
+    public void setPossibleMovesRB(ArrayList<Integer> moves)
     {
-        int numOfMoves = moves.size();
-        String[] movesStr = new String[numOfMoves];
         Label possibleMovesLB = new Label("Possible Moves");
         possibleMovesLB.setFont(Font.font("Verdana", 15));
+        int numOfMoves = moves.size();
+        String[] movesStr = new String[numOfMoves];
+
         HBox moveChoiceBox = new HBox();
-        moveChoiceBox.setAlignment(Pos.CENTER);
-        group2 = new ToggleGroup();
         RadioButton[] movesRB = new RadioButton[numOfMoves];
         for (int i = 0; i < numOfMoves; i++) {
             movesStr[i] = (String) intCardMap.get(moves.get(i));
@@ -592,8 +586,15 @@ public class MainGameUI extends Application
         for (RadioButton rb : movesRB)
             moveChoiceBox.getChildren().addAll(rb);
 
-        moveButton = new Button("Make move");
+        Button moveButton = new Button("Make move");
         moveButton.setOnAction(event -> {
+            player = client.getPlayer();
+            int m = (Integer) group2.getSelectedToggle().getUserData();
+            System.out.println("Move to " + m + " is selected.");
+            player.setMoved(true);
+            player.setNewLocation(m);
+            client.sendMessage(player);
+
         });   //user action
 
         HBox makeMoveHB = new HBox();
@@ -604,15 +605,13 @@ public class MainGameUI extends Application
 
         VBox movesVB = new VBox();
         movesVB.getChildren().addAll(possibleMovesLB, moveChoiceBox, makeMoveHB);
-        movesVB.setAlignment(Pos.CENTER);
-        movesVB.setVisible(ableToMove);  //when it's the player's turn to move
+        movesVB.setAlignment(Pos.CENTER); //when it's the player's turn to move
         movesVB.setSpacing(15);
 
         Separator leftSeparator3 = new Separator();
-        VBox movesSection = new VBox();
-        movesSection.setSpacing(30);
-        movesSection.getChildren().addAll(movesVB, moveButtonHBox, leftSeparator3);
-        return movesSection;
+
+        movesSection.getChildren().addAll(movesVB, leftSeparator3);
+
 
     }
 
@@ -648,6 +647,7 @@ public class MainGameUI extends Application
         charTokens2[3].setFill(Color.GREEN);
         charTokens2[4].setFill(Color.WHITE);
         charTokens2[5].setFill(Color.BLUE);
+
     }
 
     private Rectangle[] createRooms()
@@ -720,20 +720,34 @@ public class MainGameUI extends Application
 
     public void placeTokens(ArrayList<Integer> locations)
     {
-       int num = locations.size();
-        for (int i = 0; i < num; i++) {
-            Coordinates coordinates = (Coordinates) tokenToCoordinates.get(locations.get(i));
-            charTokens[i] = (Circle) charToTokenMap.get(i);
-            int x = coordinates.getX();
-            int y = coordinates.getY();
-            charTokens[i].setCenterX(x);
-            charTokens[i].setCenterY(y);
+        if (locations != null) {
+            group.getChildren().removeAll(charTokens);
+            int num = locations.size();
+            ArrayList<Integer> sublist = new ArrayList<>();
+            double x, y;
+
+            for (int i = 0; i < num; i++) {
+                int location = locations.get(i);
+                Coordinates coordinates = (Coordinates) tokenToCoordinates.get(location);
+                charTokens[i] = (Circle) charToTokenMap.get(i);
+                if (!sublist.contains(location)) {
+                    x = coordinates.getX();
+                    y = coordinates.getY();
+                    sublist.add(location);
+                } else {
+                   double j = Collections.frequency(sublist, location);
+                    x = coordinates.getX() + 10*j;
+                    y = coordinates.getY();
+                }
+                charTokens[i].setCenterX(x);
+                charTokens[i].setCenterY(y);
+            }
+            for (int i = 0; i < num; i++)
+                group.getChildren().add(charTokens[i]);
         }
 
-        for (int i = 0; i < num; i++)
-            group.getChildren().add(charTokens[i]);
-
     }
+
 
     public void connectionFailed()
     {
@@ -744,25 +758,6 @@ public class MainGameUI extends Application
         connected = false;
     }
 
-    public void setCharacter(String character)
-    {
-        this.character = character;
-    }
-
-    public void setPlayerID(int playerID)
-    {
-        this.playerID = playerID;
-    }
-
-    public int getCurrLocation()
-    {
-        return currLocation;
-    }
-
-    public void setCurrLocation(int currLocation)
-    {
-        this.currLocation = currLocation;
-    }
 
     private ArrayList<Integer> getSuggAccuValues(ComboBox<String> characters, ComboBox<String> weapons, ComboBox<String> rooms)
     {
@@ -778,11 +773,17 @@ public class MainGameUI extends Application
         return list;
     }
 
-    private boolean verifyComboBoxInput(ComboBox<String> characters, ComboBox<String> weapons, ComboBox<String> rooms){
-        if(characters.getValue() == null || weapons.getValue() == null || rooms.getValue() == null )
+    private boolean verifyComboBoxInput(ComboBox<String> characters, ComboBox<String> weapons, ComboBox<String> rooms)
+    {
+        if (characters.getValue() == null || weapons.getValue() == null || rooms.getValue() == null)
             return false;
 
         return true;
+    }
+
+    public static Circle[] getTokens()
+    {
+        return charTokens;
     }
 
     public VBox getCardsRBVBox()
@@ -790,6 +791,10 @@ public class MainGameUI extends Application
         return cardsRBVBox;
     }
 
+    public VBox getMovesSection()
+    {
+        return movesSection;
+    }
 
 
 }

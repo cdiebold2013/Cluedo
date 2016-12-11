@@ -31,6 +31,8 @@ public class Player implements Serializable
     private boolean active;          //after a failed accusation, the player is inactive
     private int disprovedCard;       //set to -1 if there is no diproved card
     private boolean disproved;
+    private int newLocation;
+
 
     private ArrayList<Integer> characters;
     private ArrayList<Integer> weapons;
@@ -359,6 +361,10 @@ public class Player implements Serializable
         this.disproved = disproved;
     }
 
+    public int getNewLocation() {return newLocation;}
+
+    public void setNewLocation(int newLocation) {this.newLocation = newLocation; }
+
     public Player(int playerID, String username)
     {
         this.playerID = playerID;
@@ -373,7 +379,7 @@ public class Player implements Serializable
         suggested = false;
 
         accused = false;
-        active = false;
+        active = true;
         disproved = false;
     }
 

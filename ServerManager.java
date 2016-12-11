@@ -21,6 +21,7 @@ public class ServerManager
     private boolean runFlag;
     private ServerSocket serverSocket;
     private ArrayList<Client> clients;
+    private ArrayList<Player> players;
     private static int uniqueId;
     private Game game;
   //  private Player player;
@@ -29,8 +30,9 @@ public class ServerManager
     {
         this.port = port;
         this.gui = gui;
-        clients = new ArrayList<Client>();
-        game = new Game();
+        clients = new ArrayList<>();
+        players = new ArrayList<>();
+        game = new Game(gui);
         uniqueId = 0;
 
     } //end constructor with port
@@ -83,7 +85,7 @@ public class ServerManager
      */
     private synchronized void broadcast()
     {
-        for (int i = clients.size(); i >= 0; i--) {
+        for (int i = 0; i < clients.size(); i++) {
             Client ct = clients.get(i);
             ct.sendPlayerObj();
         } //end for i
@@ -196,6 +198,11 @@ public class ServerManager
             }
         }
     }
+    
+    private synchronized void addPlayer(Player player) {
+        players.add(player);
+    } //end method addPlayer
+    
 
     class Client extends Thread
     {
@@ -225,6 +232,7 @@ public class ServerManager
             } //end try catch
             
              player = new Player(id, username);
+             addPlayer(player); //add to servermanagers players arraylist
             
         } //end client constructor socket argument
 
@@ -257,60 +265,58 @@ public class ServerManager
                 /* Process initial start of game */ 
                 if(inPlayer.isStarted()) {
                     gui.writeLog("received isStarted from " + inPlayer.getUserName());
-                    broadcastInitialSetup();   
+                    game.startGame(players);
+                    broadcast();
+                    player.setInitialSetup(false);
+                    player.setStarted(false);
+                   // broadcastInitialSetup();   
                 } //isStarted
               
                 
                 //Process an accusation 
                 if (inPlayer.isAccused()) {
-                  
-                   ArrayList<Integer> accusation = inPlayer.getAccusation(); 
-                   
-                   String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
-                   gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
-                   if (game.processAccusation(accusation.get(0), accusation.get(1), accusation.get(2))) {
-                       //declare winner game is over
-                       broadcastGameHistory("WINNER," + player.getPlayerID());
-                   } else  {
-                       //accused failed and set active flag for this player 
-                       player.setActive(false);
-                       broadcastGameHistory("ACCUSEFAILED," + player.getPlayerID());
-                       
-                       //set the turn for the nextplayer
-                       int nextTurn;
-                       if (id==clients.size()) {
-                           nextTurn = 0;
-                        
-                       } else {
-                           nextTurn =id + 1;
-                       }
-                       
-                       //set isTurn on each player object
-                       
-                       
-                   } //end if else
+
+                    ArrayList<Integer> accusation = inPlayer.getAccusation();
+
+                    String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
+                    gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
+                    if (game.processAccusation(player, accusation.get(0), accusation.get(1), accusation.get(2))) {
+                        //declare winner game is over
+                        broadcastGameHistory("WINNER," + player.getPlayerID() + "\n" + "Game is over.");
+                    } else  {
+                        //accused failed and set active flag for this player
+                        player.setActive(false);
+                        broadcastGameHistory("Player" + player.getPlayerID()+ "'s accusation failed.");
+
+                        //set isTurn on each player object
+
+
+                    } //end if else
                    
                 } //end if isAccused
                 
                 
                 if(inPlayer.isMoved()) {
-                    
-                    
-                    
+                  int id = inPlayer.getPlayerID();
+                    int newLoc = inPlayer.getNewLocation();
+                  game.processMove(players, id, newLoc);
+                  broadcast(); 
                 } //end if isMoved
                 
                 
                 
                 if(inPlayer.isSuggested()) {
                     
-                    
+                   ArrayList<Integer> suggestion = inPlayer.getSuggestoin();   
+                  game.processSuggestion(player, suggestion.get(0), suggestion.get(1), suggestion.get(2));
+                   broadcast(); 
                     
                 } //end if isSuggested
                 
                 
                 if(inPlayer.isDisproved()) {
-                    
-                    
+                   game.processDisprove(player, inPlayer.getDisprovedCard());
+                   broadcast();
                     
                 } //end if isDisproved
                 

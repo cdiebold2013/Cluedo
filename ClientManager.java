@@ -5,7 +5,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import javafx.application.Platform;
+import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 /**
  * Created by Hao on 12/6/2016.
@@ -24,6 +26,7 @@ public class ClientManager
     private int port;
     // private StringBuilder stringBuilder = new StringBuilder();
     private VBox cardsRBVBox;
+    private VBox moveSections;
 
     /*
      *  Constructor called by console mode
@@ -180,30 +183,107 @@ public class ClientManager
                             if (player.isInitialSetup()) {
 
                                 int id = player.getPlayerID();
-
                                 ArrayList<Integer> list = player.getCards();
+
+                                    Platform.runLater(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+
+                                            gameUI.characterLB.setText((String) gameUI.intCardMap.get(id));
+                                            gameUI.idLB.setText(Integer.toString(id));
+                                            gameUI.setCardsRB(list);
+                                            cardsRBVBox = gameUI.getCardsRBVBox();
+                                            cardsRBVBox.setVisible(true);
+                                            gameUI.window.setScene(gameUI.scene2);
+
+                                        }
+                                    });
+                                    player.setInitialSetup(false);
+                                }
+                            if (player.isTurn()) {
+
+                                ArrayList<Integer> list = player.getAllowedActions();
+                                //System.out.println(list.toString()
+                                if(list != null) {
+                                    if (list.get(list.size() - 1) == 1) {
+
+                                        Platform.runLater(new Runnable()
+                                        {
+                                            @Override
+                                            public void run()
+                                            {
+                                                if (list.size() > 1) {
+                                                    ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size() - 1));
+                                                    gameUI.setPossibleMovesRB(sublist);
+                                                    moveSections = gameUI.getMovesSection();
+                                                    moveSections.setVisible(true);
+
+                                                } else gameUI.notAbleToMove.setVisible(true);
+                                            }
+
+
+                                        });
+                                        player.setTurn(false);
+                                    }
+                                    if (list.get(list.size() - 1) == 0) {
+                                        Platform.runLater(new Runnable()
+                                        {
+                                            @Override
+                                            public void run()
+                                            {
+                                                if (list.size() > 1) {
+                                                    ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size() - 1));
+                                                    gameUI.setPossibleMovesRB(sublist);
+                                                    moveSections = gameUI.getMovesSection();
+                                                    moveSections.setVisible(true);
+
+                                                } else gameUI.notAbleToMove.setVisible(true);
+                                                gameUI.makeSuggButton.setDisable(false);
+                                            }
+
+                                        });
+                                        player.setTurn(false);
+                                    }
+                                }
+                            }
+
+                            if (player.isTurnToDisprove()) {
+
                                 Platform.runLater(new Runnable()
                                 {
                                     @Override
                                     public void run()
                                     {
-                                        gameUI.characterLB.setText((String) gameUI.intCardMap.get(id));
-                                        gameUI.idLB.setText(Integer.toString(id));
-                                     //   gameUI.setCardsRB(list);
-                                     //   cardsRBVBox = gameUI.getCardsRBVBox();
-                                     //   cardsRBVBox.setVisible(true);
+                                        gameUI.disproveButton.setDisable(false);
+                                        gameUI.disproveButton.setOnAction(event ->                                     //disprove buttons
+                                        {
+                                            if (gameUI.group1.getSelectedToggle() == null)
+                                                player.setDisprovedCard(-1);
+                                            else {
+                                                int m = (Integer) gameUI.group1.getSelectedToggle().getUserData();              //extract disproved card
+                                                System.out.println("Card "+ m + "is disproved.");
+                                            }
+                                            player.setDisproved(true);
+                                            sendMessage(player);
 
+
+                                        });
+
+                                        gameUI.disproveButton2 = new Button("Unable to disprove");
+                                        gameUI.disproveButton2.setDisable(true);
+                                        gameUI.disproveButton2.setOnAction(event ->
+                                        {
+
+                                            player.setDisproved(true);
+                                            player.setDisprovedCard(-1);
+                                            sendMessage(player);
+
+                                        });
                                     }
+
                                 });
-                                player.setInitialSetup(false);
-                            }
-
-                            if (player.isTurn()) {
-
-                            }
-
-                            if (player.isTurnToDisprove()) {
-
                             }
 
                             if (player.isDisproved()) {
@@ -211,25 +291,39 @@ public class ClientManager
                             }
                             if (!player.isActive()) {
 
+                                /*Platform.runLater(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        int id = player.getPlayerID();
+                                        gameUI.charTokens[id].setVisible(false);
+
+                                    }
+
+                                });*/
+
                             }
 
                             //game board and game history
                             ArrayList<Integer> gamePieceLoc = player.getGamePieceLocations();
+                            System.out.println(gamePieceLoc);
                             String gameUpdate = player.getGameHistoryUpdate();
                             System.out.println(gameUpdate);
 
-                            Platform.runLater(new Runnable()
-                            {
-                                @Override
-                                public void run()
+
+                                Platform.runLater(new Runnable()
                                 {
-                                  //  gameUI.placeTokens(gamePieceLoc);
-                                    gameUI.gameHistoryTA.appendText(gameUpdate+ "\n");
-                                }
-                            });
+                                    @Override
+                                    public void run()
+                                    {
+                                        gameUI.placeTokens(gamePieceLoc);
+                                        gameUI.gameHistoryTA.appendText(gameUpdate + "\n");
+                                    }
+                                });
 
+                            }
 
-                        }
                     }
                 } catch (IOException e) {
                     displayMsg("Server has close the connection: " + e);
