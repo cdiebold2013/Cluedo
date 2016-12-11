@@ -189,9 +189,9 @@ public class ClientManager
                                     {
                                         gameUI.characterLB.setText((String) gameUI.intCardMap.get(id));
                                         gameUI.idLB.setText(Integer.toString(id));
-                                        gameUI.setCardsRB(list);
-                                        cardsRBVBox = gameUI.getCardsRBVBox();
-                                        cardsRBVBox.setVisible(true);
+                                     //   gameUI.setCardsRB(list);
+                                     //   cardsRBVBox = gameUI.getCardsRBVBox();
+                                     //   cardsRBVBox.setVisible(true);
 
                                     }
                                 });
@@ -223,7 +223,7 @@ public class ClientManager
                                 @Override
                                 public void run()
                                 {
-                                    gameUI.placeTokens(gamePieceLoc);
+                                  //  gameUI.placeTokens(gamePieceLoc);
                                     gameUI.gameHistoryTA.appendText(gameUpdate+ "\n");
                                 }
                             });

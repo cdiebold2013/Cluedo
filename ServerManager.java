@@ -74,7 +74,7 @@ public class ServerManager
         gui.writeLog("Stopping server");
         runFlag = false;
         Socket socket = new Socket("localhost", port);
-
+        gui.resetLog();
     } //end method stop
 
     /**
@@ -232,8 +232,9 @@ public class ServerManager
         public void run()
         {
             boolean runFlag = true;
-            
-            
+            player.setGameHistoryUpdate("Game Initializing");
+            sendPlayerObj();
+            player.setGameHistoryUpdate(null);
             //notify all clients that I joined the game
             broadcastJoinedPlayer(player.getUserName() + "," + player.getPlayerID()); 
            
@@ -247,21 +248,26 @@ public class ServerManager
             while (runFlag) {
                 try {
                     inPlayer = (Player) input.readObject();
+                    gui.writeLog("Receiving Message from " + inPlayer.getUserName());
                 } catch (IOException | ClassNotFoundException ex) {
                  //   Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     break;
                 } //end try catch
 
                 /* Process initial start of game */ 
-                if(inPlayer.isStarted()) {broadcastInitialSetup();} 
-               
-               
-                
+                if(inPlayer.isStarted()) {
+                    gui.writeLog("received isStarted from " + inPlayer.getUserName());
+                    broadcastInitialSetup();   
+                } //isStarted
+              
                 
                 //Process an accusation 
                 if (inPlayer.isAccused()) {
                   
-                   ArrayList<Integer> accusation = inPlayer.getAccusation();                  
+                   ArrayList<Integer> accusation = inPlayer.getAccusation(); 
+                   
+                   String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
+                   gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
                    if (game.processAccusation(accusation.get(0), accusation.get(1), accusation.get(2))) {
                        //declare winner game is over
                        broadcastGameHistory("WINNER," + player.getPlayerID());
@@ -350,10 +356,14 @@ public class ServerManager
 
         private void close() throws IOException
         {
-            System.out.println("Closing connection " + player.getUserName());
-            if (output != null) output.close();
-            if (input != null) input.close();
-            if (socket != null) socket.close();
+            //PD 
+            //Note I am receiving unexpection IOException so I am not closing
+            //anything because it is severing good connections
+            //more debugging needs to be done to account for issue
+            gui.writeLog("Closing connection " + player.getUserName());
+//            if (output != null) output.close();
+//            if (input != null) input.close();
+//            if (socket != null) socket.close();
 
         } //end method close
 
