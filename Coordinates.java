@@ -3,16 +3,16 @@
  */
 public class Coordinates
 {
-    private int coordinateX;
-    private int coordinateY;
+    private double coordinateX;
+    private double coordinateY;
 
-    public Coordinates(int x, int y)
+    public Coordinates(double x, double y)
     {
         coordinateX = x;
         coordinateY = y;
     }
 
-    public int getX() {return coordinateX;}
-    public int getY() {return coordinateY;}
+    public double getX() {return coordinateX;}
+    public double getY() {return coordinateY;}
 
 }
