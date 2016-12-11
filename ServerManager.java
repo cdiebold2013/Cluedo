@@ -32,7 +32,7 @@ public class ServerManager
         this.gui = gui;
         clients = new ArrayList<>();
         players = new ArrayList<>();
-        game = new Game();
+        game = new Game(gui);
         uniqueId = 0;
 
     } //end constructor with port
@@ -280,7 +280,7 @@ public class ServerManager
                    
                    String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
                    gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
-                   if (game.processAccusation(accusation.get(0), accusation.get(1), accusation.get(2))) {
+                   if (game.processAccusation(player, accusation.get(0), accusation.get(1), accusation.get(2))) {
                        //declare winner game is over
                        broadcastGameHistory("WINNER," + player.getPlayerID());
                    } else  {
@@ -299,22 +299,24 @@ public class ServerManager
                 
                 if(inPlayer.isMoved()) {
                    
-                    
-                    
+                  game.processMove(player, inPlayer.getLocationID());
+                  broadcast(); 
                 } //end if isMoved
                 
                 
                 
                 if(inPlayer.isSuggested()) {
                     
-                    
+                   ArrayList<Integer> suggestion = inPlayer.getSuggestoin();   
+                  game.processSuggestion(player, suggestion.get(0), suggestion.get(1), suggestion.get(2));
+                   broadcast(); 
                     
                 } //end if isSuggested
                 
                 
                 if(inPlayer.isDisproved()) {
-                    
-                    
+                   game.processDisprove(player, inPlayer.getDisprovedCard());
+                   broadcast();
                     
                 } //end if isDisproved
                 
