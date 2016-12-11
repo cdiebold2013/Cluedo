@@ -23,9 +23,10 @@ public class CaseFile {
     } //end method
     
     /* For diagnostics only */
-    public void getCaseFile () {
-        System.out.println("suspect=" + suspect + "  "
-                + "weapon=" + weapon + " room=" + room);
+    public String getCaseFile () {
+        return "suspect=" + suspect + "  "
+                + "weapon=" + weapon + " room=" + room;
+        
     } //end method getCaseFile
     
 } //end cass CaseFile
