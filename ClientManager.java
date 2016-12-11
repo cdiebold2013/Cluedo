@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 /**
  * Created by Hao on 12/6/2016.
@@ -204,49 +205,48 @@ public class ClientManager
                             if (player.isTurn()) {
 
                                 ArrayList<Integer> list = player.getAllowedActions();
-                                System.out.println(list.toString());
-                                if (list.get(list.size()-1) == 1) {
+                                //System.out.println(list.toString()
+                                if(list != null) {
+                                    if (list.get(list.size() - 1) == 1) {
 
-                                    Platform.runLater(new Runnable()
-                                    {
-                                        @Override
-                                        public void run()
+                                        Platform.runLater(new Runnable()
                                         {
-                                            if (list.size() > 1) {
-                                                ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size()-1));
-                                                gameUI.setPossibleMovesRB(sublist);
-                                                moveSections = gameUI.getMovesSection();
-                                                moveSections.setVisible(true);
+                                            @Override
+                                            public void run()
+                                            {
+                                                if (list.size() > 1) {
+                                                    ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size() - 1));
+                                                    gameUI.setPossibleMovesRB(sublist);
+                                                    moveSections = gameUI.getMovesSection();
+                                                    moveSections.setVisible(true);
 
+                                                } else gameUI.notAbleToMove.setVisible(true);
                                             }
-                                            else gameUI.notAbleToMove.setVisible(true);
-                                        }
 
 
-                                    });
-                                    player.setTurn(false);
-                                }
-                                if (list.get(list.size()-1) == 0) {
-                                    Platform.runLater(new Runnable()
-                                    {
-                                        @Override
-                                        public void run()
+                                        });
+                                        player.setTurn(false);
+                                    }
+                                    if (list.get(list.size() - 1) == 0) {
+                                        Platform.runLater(new Runnable()
                                         {
-                                            if (list.size() > 1) {
-                                                ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size()-1));
-                                                gameUI.setPossibleMovesRB(sublist);
-                                                moveSections = gameUI.getMovesSection();
-                                                moveSections.setVisible(true);
+                                            @Override
+                                            public void run()
+                                            {
+                                                if (list.size() > 1) {
+                                                    ArrayList<Integer> sublist = new ArrayList<Integer>(list.subList(0, list.size() - 1));
+                                                    gameUI.setPossibleMovesRB(sublist);
+                                                    moveSections = gameUI.getMovesSection();
+                                                    moveSections.setVisible(true);
 
+                                                } else gameUI.notAbleToMove.setVisible(true);
+                                                gameUI.makeSuggButton.setDisable(false);
                                             }
-                                            else gameUI.notAbleToMove.setVisible(true);
-                                            gameUI.makeSuggButton.setDisable(false);
-                                        }
 
-                                    });
-                                    player.setTurn(false);
+                                        });
+                                        player.setTurn(false);
+                                    }
                                 }
-
                             }
 
                             if (player.isTurnToDisprove()) {
@@ -290,6 +290,18 @@ public class ClientManager
 
                             }
                             if (!player.isActive()) {
+
+                                Platform.runLater(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        int id = player.getPlayerID();
+                                        gameUI.charTokens[id].setVisible(false);
+
+                                    }
+
+                                });
 
                             }
 

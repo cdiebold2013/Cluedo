@@ -32,7 +32,7 @@ import com.google.common.collect.HashBiMap;
 public class MainGameUI extends Application
 {
 
-    private static Circle[] charTokens;
+    protected static Circle[] charTokens;
     protected TextArea statusTA;
     protected BiMap cardIntMap;
     protected BiMap intCardMap;
@@ -70,11 +70,6 @@ public class MainGameUI extends Application
     public static void main(String[] args)
     {
         launch(args);
-    }
-
-    public static Circle[] getTokens()
-    {
-        return charTokens;
     }
 
     public void start(Stage primaryStage)
@@ -784,6 +779,11 @@ public class MainGameUI extends Application
             return false;
 
         return true;
+    }
+
+    public static Circle[] getTokens()
+    {
+        return charTokens;
     }
 
     public VBox getCardsRBVBox()

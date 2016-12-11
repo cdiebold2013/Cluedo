@@ -1,7 +1,6 @@
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
+import com.google.common.collect.BiMap;
+
+import java.util.*;
 
 /**
  * @author PD, HY
@@ -14,6 +13,8 @@ public class Game
     private ArrayList<Integer> rooms;
     private Node[] nodes;
     private ServerGUI gui;
+    private BiMap intToCardMap;
+
     private class Node
     {
 
@@ -42,6 +43,8 @@ public class Game
         this.gui = gui;
         casefile = new CaseFile();
         rooms = new ArrayList<>();
+        CardsIntMap map = new CardsIntMap();
+        intToCardMap = map.getIntToCardMap();
         for(int i=12; i<21; i++)
             rooms.add(i);
         adjList = new ArrayList[33];
@@ -121,16 +124,19 @@ public class Game
     public void startGame(ArrayList<Player> players)
     {
         // choose n number of random starting locations
-        int[] locations = new Random().ints(0, 33).distinct().limit(players.size()).toArray();
-
+        //int[] locations = new Random().ints(0, 33).distinct().limit(players.size()).toArray();
+        int[] iniLocations = {22, 29, 26, 25, 30, 27};
+        ArrayList<Integer> list = new ArrayList<>();
         // assign cards and starting locations to each player
         // update game history with players joining
         int numberOfPlayers = players.size();
         for (int i=0; i<numberOfPlayers; i++) {
             Player player = players.get(i);
-
+            list.add(iniLocations[i]);
+            nodes[i].setOccupied(true);
             assignCards(player, numberOfPlayers);
-            player.setLocationID(locations[i]);
+            player.setLocationID(iniLocations[i]);
+            player.setGamePieceLocations(list);
             player.setGameHistoryUpdate(player.getUserName() + " joined the game and has cards assigned.");
             player.setInitialSetup(true);
         }
@@ -138,6 +144,7 @@ public class Game
         // set turn to first player, and provide possible move options
         Player player1 = players.get(0);
         player1.setTurn(true);
+        player1.setAllowedActions(allowedActions(player1));
     } //end method StartGame
 
     public void endGame()
@@ -166,14 +173,31 @@ public class Game
         return options;
     }
 
-    public void processMove(Player player, int newLoc)
+    public void processMove(ArrayList<Player> players, int playerID, int newLoc)
     {
        //set the player's old location unoccupied
-        int oldLoc = player.getLocationID();
+        int numOfPlayers = players.size();
+        Player movedPlayer = players.get(playerID);
+        ArrayList<Integer> gamePieceLocations = movedPlayer.getGamePieceLocations();
+        gamePieceLocations.remove(playerID);
+        gamePieceLocations.add(playerID, newLoc);
+        int oldLoc = movedPlayer.getLocationID();
         nodes[oldLoc].setOccupied(false);
+        movedPlayer.setLocationID(newLoc);
+        String characterName = (String)intToCardMap.get(playerID);
+        String locationName = (String)intToCardMap.get(newLoc);
+
+        for(int i=0; i<numOfPlayers; i++){
+          Player player = players.get(i);
+            player.setGameHistoryUpdate(characterName + " moved to " + locationName);
+            player.setGamePieceLocations(gamePieceLocations);
+
+    }
+
+
 
         //set the player's new location occupied
-        player.setLocationID(newLoc);
+
         nodes[newLoc].setOccupied(true);
 
     }

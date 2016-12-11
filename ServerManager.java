@@ -298,8 +298,8 @@ public class ServerManager
                 
                 
                 if(inPlayer.isMoved()) {
-                   
-                  game.processMove(player, inPlayer.getLocationID());
+                  int id = inPlayer.getPlayerID();
+                  game.processMove(players, id, inPlayer.getLocationID());
                   broadcast(); 
                 } //end if isMoved
                 
