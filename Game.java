@@ -13,7 +13,7 @@ public class Game
     //private int numOfPlayers;
     private ArrayList<Integer> rooms;
     private Node[] nodes;
-
+    private ServerGUI gui;
     private class Node
     {
 
@@ -37,9 +37,9 @@ public class Game
         }
     }
 
-    public Game()
+    public Game(ServerGUI gui)
     {
-
+        this.gui = gui;
         casefile = new CaseFile();
         rooms = new ArrayList<>();
         for(int i=12; i<21; i++)
@@ -178,15 +178,14 @@ public class Game
 
     }
 
-    public void processSuggestion()
+    public void processSuggestion(Player player, int suspect, int weapon, int room)
     {
 
     } //end method processSuggestion 
 
-    public boolean processAccusation(int suspect, int weapon, int room)
+    public boolean processAccusation(Player player, int suspect, int weapon, int room)
     {
-        System.out.println("Game:" + suspect + " " + weapon + " " + room);
-        casefile.getCaseFile();
+        gui.writeLog("Casefile is " + casefile.getCaseFile());
         Boolean match = casefile.matchCaseFile(suspect, weapon, room);
         if (match) {   //we have a winner
             return true;
@@ -216,7 +215,7 @@ public class Game
         //decide whose turn it is to disprove
     }
 
-    public void processDisprove(){
+    public void processDisprove(Player player, int card){
         //process disproves
     }
 
