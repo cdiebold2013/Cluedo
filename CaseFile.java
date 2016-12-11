@@ -23,10 +23,15 @@ public class CaseFile {
     } //end method
     
     /* For diagnostics only */
-    public String getCaseFile () {
+    public String getCaseFileResult () {
         return "suspect=" + suspect + "  "
                 + "weapon=" + weapon + " room=" + room;
         
-    } //end method getCaseFile
+    }
+
+    public int[] getCaseFile(){
+        int[] file = new int[]{suspect, weapon, room};
+        return file;
+    }//end method getCaseFile
     
 } //end cass CaseFile
