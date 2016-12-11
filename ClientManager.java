@@ -291,7 +291,7 @@ public class ClientManager
                             }
                             if (!player.isActive()) {
 
-                                Platform.runLater(new Runnable()
+                                /*Platform.runLater(new Runnable()
                                 {
                                     @Override
                                     public void run()
@@ -301,7 +301,7 @@ public class ClientManager
 
                                     }
 
-                                });
+                                });*/
 
                             }
 

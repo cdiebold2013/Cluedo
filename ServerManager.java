@@ -275,31 +275,31 @@ public class ServerManager
                 
                 //Process an accusation 
                 if (inPlayer.isAccused()) {
-                  
-                   ArrayList<Integer> accusation = inPlayer.getAccusation(); 
-                   
-                   String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
-                   gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
-                   if (game.processAccusation(player, accusation.get(0), accusation.get(1), accusation.get(2))) {
-                       //declare winner game is over
-                       broadcastGameHistory("WINNER," + player.getPlayerID());
-                   } else  {
-                       //accused failed and set active flag for this player 
-                       player.setActive(false);
-                       broadcastGameHistory("ACCUSEFAILED," + player.getPlayerID());
-                       
-                       
-                       //set isTurn on each player object
-                       
-                       
-                   } //end if else
+
+                    ArrayList<Integer> accusation = inPlayer.getAccusation();
+
+                    String accusationValues = accusation.get(0).toString() + "," + accusation.get(1).toString() + "," + accusation.get(2).toString();
+                    gui.writeLog("Player: " + inPlayer.getUserName() + " accusation is " + accusationValues);
+                    if (game.processAccusation(player, accusation.get(0), accusation.get(1), accusation.get(2))) {
+                        //declare winner game is over
+                        broadcastGameHistory("WINNER," + player.getPlayerID() + "\n" + "Game is over.");
+                    } else  {
+                        //accused failed and set active flag for this player
+                        player.setActive(false);
+                        broadcastGameHistory("Player" + player.getPlayerID()+ "'s accusation failed.");
+
+                        //set isTurn on each player object
+
+
+                    } //end if else
                    
                 } //end if isAccused
                 
                 
                 if(inPlayer.isMoved()) {
                   int id = inPlayer.getPlayerID();
-                  game.processMove(players, id, inPlayer.getLocationID());
+                    int newLoc = inPlayer.getNewLocation();
+                  game.processMove(players, id, newLoc);
                   broadcast(); 
                 } //end if isMoved
                 

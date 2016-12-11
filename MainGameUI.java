@@ -592,8 +592,8 @@ public class MainGameUI extends Application
             int m = (Integer) group2.getSelectedToggle().getUserData();
             System.out.println("Move to " + m + " is selected.");
             player.setMoved(true);
+            player.setNewLocation(m);
             client.sendMessage(player);
-
 
         });   //user action
 
